@@ -5,6 +5,8 @@
 #include "Button.h"
 #include "globals.h"
 
+void updateEncoder();
+void waitABit(int time);
 
 //Motor pins
 #define p_MTR_IN1 6

@@ -1,5 +1,12 @@
 
 #include "headers.h"
+//#define DEBUG
+
+enum States {
+  Standby,
+  Menu,
+  Testing
+};
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Motor motor1(p_MTR_EN, p_MTR_IN1, p_MTR_IN2);
@@ -40,9 +47,88 @@ void setup() {
 
 // int test = 0;
 // int test2[] = {LOW, LOW, HIGH};
-
+States currentState = Standby;
 int potRead = 0;
+
+int potReading = 0;
+int duty = 0;
+int lastDuty = 0;
 void loop() {
+#ifndef DEBUG
+  switch (currentState){
+    case Standby:
+      motor1.turnOff();
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Standby...");
+      lcd.setCursor(0, 1);
+      lcd.print("Press to begin");
+      for(;;)
+      {
+        if(button1.poll()){
+          currentState = Menu;
+          break;
+        }
+      }
+      break;
+    case Menu:
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Duty Cycle:");
+      lcd.setCursor(0, 1);
+      lcd.print("Press to start");
+      for(;;){
+        
+        potReading = analogRead(p_POT);
+        duty = map(potReading,500,1023,50,255);
+        if(duty != lastDuty){
+          lastDuty = duty;
+          lcd.setCursor(11, 0);
+          lcd.print((int)map(duty,0,255,0,100));
+          lcd.print("%");
+        }
+        if(button1.poll()){
+          currentState = Testing;
+          motor1.setPWMCycle(duty);
+          break;
+        }
+      }
+        break;
+    case Testing:
+      motor1.turnOn();
+      lcd.clear();
+      motor1.setPWMCycle(duty);
+      lastDuty = duty;
+      lcd.setCursor(0,0);
+      lcd.print("Duty Cycle:");
+      lcd.print((int)map(duty,0,255,0,100));
+      lcd.print("%");
+      lcd.setCursor(0, 1);
+      lcd.print("Motor Running..");
+      lastDuty = 0;
+      for(;;){
+        potReading = analogRead(p_POT);
+        duty = map(potReading,500,1023,50,255);
+        if (duty != lastDuty)
+        {
+          motor1.setPWMCycle(duty);
+          lastDuty = duty;
+          lcd.setCursor(11,0);
+          lcd.print((int)map(duty,0,255,0,100));
+          lcd.print("%");
+        }
+
+        if(button1.poll()){
+          currentState = Standby;
+          break;
+        }
+      }
+    break;      
+  }
+}
+
+#endif
+#ifdef DEBUG
 
   if(button1.poll())
   {
@@ -59,18 +145,13 @@ void loop() {
       motor1.turnOn();
     }
 
-    if(motor1.isOn()){
+  }
+      if(motor1.isOn()){
       potRead = analogRead(p_POT);
-      motor1.setPWMCycle((map(potRead,0,1023,0,255)));
+      motor1.setPWMCycle((map(potRead,500,1023,50,255)));
       Serial.println("pot is at");
       Serial.print(potRead);
-    }
-
-
-  }
-
-    
-        
+    }  
 
   // if((millis() - g_lastDebounceTime)> debounceDelay)
   // {
@@ -89,8 +170,10 @@ void loop() {
   // motor1.setDirection(!(motor1.getDirection()));
   // Serial.print("Changing direction to: ");
   // waitABit(3000);
+  }
+#endif
 
-}
+
 
 void waitABit(int time)
 {
@@ -103,7 +186,7 @@ void waitABit(int time)
       return;
   }
 
-}
+  }
 }
 
 // Function to update the encoder tick count
