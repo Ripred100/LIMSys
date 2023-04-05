@@ -2,7 +2,9 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include "Motor.h"
+#include "Button.h"
 #include "globals.h"
+
 
 //Motor pins
 #define p_MTR_IN1 6
@@ -22,6 +24,9 @@
 
 //Voltmeter pin
 #define p_VOLTMETER A0
+
+//Potentiometer 
+#define p_POT A1
 
 //Temperature sencors
 #define p_TEMPERATURE1 A3
