@@ -7,7 +7,7 @@ Motor::Motor(int pwmPin, int dirPin1, int dirPin2) {
   _PIN_Dir2 = dirPin2;
   _isOn = false;
   _PWM = 0;
-  _dir = 0;
+  _dir = 1;
 
   pinMode(_PIN_PWM, OUTPUT);
   pinMode(_PIN_Dir1, OUTPUT);
