@@ -17,23 +17,30 @@ Motor::Motor(int pwmPin, int dirPin1, int dirPin2) {
 
 void Motor::setPWMCycle(int pwmCycle) {
   _PWM = pwmCycle;
+  if(!_isOn) 
+    return;
   analogWrite(_PIN_PWM, _PWM);
 }
 
 void Motor::setDirection(bool dir) {
   _dir = dir;
+  if(!_isOn) 
+    return;
   digitalWrite(_PIN_Dir1, _dir);
   digitalWrite(_PIN_Dir2, !_dir);
+
 }
 
 void Motor::turnOn() {
   _isOn = true;
+  digitalWrite(_PIN_Dir1, _dir);
+  digitalWrite(_PIN_Dir2, !_dir);
+  analogWrite(_PIN_PWM, _PWM);
 }
 
 void Motor::turnOff() {
   _isOn = false;
-  _PWM = 0;
-  analogWrite(_PIN_PWM, _PWM);
+  analogWrite(_PIN_PWM, 0);
 }
 
 bool Motor::isOn() {
